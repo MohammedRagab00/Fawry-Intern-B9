@@ -1,19 +1,20 @@
 package user;
 
-import cart.Cart;
+import cart.entity.Cart;
 
 public class User {
     private String name;
     private String email;
     private String phoneNumber;
     private double balance;
-    private Cart cart;
+    private final Cart cart;
 
     public User(String name, String email, String phoneNumber, double balance) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         setBalance(balance);
+        cart = new Cart(this);
     }
 
     public String getName() {
@@ -65,10 +66,14 @@ public class User {
             if (balance >= amount) {
                 balance -= amount;
             } else {
-                throw new IllegalArgumentException("Insufficient balance");
+                throw new IllegalArgumentException("Insufficient balance, check your account and try again");
             }
         } else {
             throw new IllegalArgumentException("Added amount should be positive");
         }
+    }
+
+    public Cart getCart() {
+        return cart;
     }
 }

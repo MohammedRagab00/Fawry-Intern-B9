@@ -18,10 +18,10 @@ public class ExpirableProduct extends Product implements Expirable {
     }
 
     public void setExpiryDate(LocalDateTime expiryDate) {
-        if (expiryDate.isBefore(LocalDateTime.now())) {
+        if (expiryDate.isAfter(LocalDateTime.now())) {
             this.expiryDate = expiryDate;
         } else {
-            System.err.println("Expiry date should be in the future");
+            throw new IllegalArgumentException("Expiry date should be in the future");
         }
     }
 }
