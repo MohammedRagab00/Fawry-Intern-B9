@@ -2,6 +2,9 @@ import cart.entity.Cart;
 import cart.entity.CartItem;
 import cart.service.CartService;
 import cart.service.ICartService;
+import cart.validator.ExpirationValidator;
+import cart.validator.StockValidator;
+import payment.service.PaymentService;
 import print.service.PrintService;
 import product.ExpirableProduct;
 import product.ExpirableShippableProduct;
@@ -10,6 +13,7 @@ import product.ShippableProduct;
 import user.User;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 public class Main {
     public static void main(String[] args) {
@@ -56,6 +60,8 @@ public class Main {
     }
 
     public static ICartService getCartService(Cart cart) {
-        return new CartService(cart, new PrintService());
+        return new CartService(cart, new PrintService(), new PaymentService(),
+                Set.of(new ExpirationValidator(), new StockValidator())
+        );
     }
 }
