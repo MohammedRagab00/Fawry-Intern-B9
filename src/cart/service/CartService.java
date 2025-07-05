@@ -2,67 +2,31 @@ package cart.service;
 
 import cart.dto.TotalDto;
 import cart.entity.Cart;
-import cart.entity.CartItem;
+import print.service.IPrintService;
 import product.property.Expirable;
 import product.property.Shippable;
 
 public class CartService implements ICartService {
     private final Cart cart;
+    private final IPrintService printService;
 
-    public CartService(Cart cart) {
+    public CartService(Cart cart, IPrintService printService) {
         this.cart = cart;
+        this.printService = printService;
     }
 
     @Override
     public void checkout() {
+        if (cart.getCartItems().isEmpty()) {
+            throw new IllegalStateException("Cart is empty, add items to checkout");
+        }
         checkStockAndExpiration();
         TotalDto total = getTotal();
         cart.getUser().withDraw(total.subTotal() + total.shipping());
         changeStock();
 
-        StringBuilder response = new StringBuilder("** Shipment Notice **\n");
-        double totalWeight = 0;
-
-        for (CartItem item : cart.getCartItems()) {
-            if (item.getProduct() instanceof Shippable shippable) {
-                double itemWeight = shippable.getWeight() * item.getQuantity();
-                totalWeight += itemWeight;
-                response.append(item.getQuantity())
-                        .append("x\t")
-                        .append(item.getProduct().getName())
-                        .append("\t")
-                        .append(itemWeight)
-                        .append("g\n");
-            }
-        }
-
-        response.append("Total package weight ")
-                .append(String.format("%.1fkg\n", totalWeight / 1000));
-
-        response.append("\n** Checkout receipt **\n");
-        for (CartItem item : cart.getCartItems()) {
-            double lineTotal = item.getQuantity() * item.getProduct().getPrice();
-
-            response.append(item.getQuantity())
-                    .append("x\t")
-                    .append(item.getProduct().getName())
-                    .append("\t")
-                    .append(lineTotal)
-                    .append("\n");
-        }
-
-        response.append("----------------------\n")
-                .append("Subtotal\t")
-                .append(String.format("%.2f", total.subTotal()))
-                .append("\n")
-                .append("Shipping\t")
-                .append(total.shipping())
-                .append("\n")
-                .append("Amount\t\t")
-                .append(String.format("%.2f", total.subTotal() + total.shipping()))
-                .append("\n");
-
-        System.out.println(response);
+        printService.printTheCheck(cart.getCartItems(), total);
+        cart.getCartItems().clear();
     }
 
     private void checkStockAndExpiration() {

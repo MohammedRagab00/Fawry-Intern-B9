@@ -45,7 +45,7 @@ public class User {
         return balance;
     }
 
-    public void setBalance(double balance) {
+    private void setBalance(double balance) {
         if (balance >= 0) {
             this.balance = balance;
         } else {
@@ -54,6 +54,9 @@ public class User {
     }
 
     public void addBalance(double amount) {
+        if (Double.MAX_VALUE - amount < balance) {
+            throw new IllegalArgumentException("Your balance is full, contact the admin");
+        }
         if (amount > 0) {
             balance += amount;
         } else {
